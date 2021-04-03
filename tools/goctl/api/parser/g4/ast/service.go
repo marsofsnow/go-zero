@@ -50,7 +50,7 @@ type AtDoc struct {
 	Kv         []*KvExpr
 }
 
-// AtHandler describes service hander ast for api syntax
+// AtHandler describes service handler ast for api syntax
 type AtHandler struct {
 	AtHandlerToken Expr
 	Name           Expr
@@ -219,7 +219,6 @@ func (v *ApiVisitor) VisitBody(ctx *api.BodyContext) interface{} {
 	if api.IsGolangKeyWord(idRxpr.Text()) {
 		v.panic(idRxpr, fmt.Sprintf("expecting 'ID', but found golang keyword '%s'", idRxpr.Text()))
 	}
-	v.exportCheck(idRxpr)
 
 	return &Body{
 		Lp:   v.newExprWithToken(ctx.GetLp()),
@@ -250,7 +249,6 @@ func (v *ApiVisitor) VisitReplybody(ctx *api.ReplybodyContext) interface{} {
 		default:
 			v.panic(dt.Expr(), fmt.Sprintf("unsupport %s", dt.Expr().Text()))
 		}
-		v.log.Warning("%s %d:%d deprecated array type near '%s'", v.prefix, dataType.ArrayExpr.Line(), dataType.ArrayExpr.Column(), dataType.ArrayExpr.Text())
 	case *Literal:
 		lit := dataType.Literal.Text()
 		if api.IsGolangKeyWord(dataType.Literal.Text()) {
@@ -632,7 +630,7 @@ func (s *Service) Equal(v interface{}) bool {
 	return s.ServiceApi.Equal(service.ServiceApi)
 }
 
-// Get returns the tergate KV by specified key
+// Get returns the target KV by specified key
 func (kv KV) Get(key string) Expr {
 	for _, each := range kv {
 		if each.Key.Text() == key {

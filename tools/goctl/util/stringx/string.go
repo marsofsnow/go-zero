@@ -6,7 +6,7 @@ import (
 	"unicode"
 )
 
-// String  provides for coverting the source text into other spell case,like lower,snake,camel
+// String  provides for converting the source text into other spell case,like lower,snake,camel
 type String struct {
 	source string
 }
@@ -30,6 +30,11 @@ func (s String) IsEmptyOrSpace() bool {
 // Lower calls the strings.ToLower
 func (s String) Lower() string {
 	return strings.ToLower(s.source)
+}
+
+// Upper calls the strings.ToUpper
+func (s String) Upper() string {
+	return strings.ToUpper(s.source)
 }
 
 // ReplaceAll calls the strings.ReplaceAll

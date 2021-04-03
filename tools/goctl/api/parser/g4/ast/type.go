@@ -17,7 +17,7 @@ type (
 		NameExpr() Expr
 	}
 
-	// TypeAlias describes alias ast for api syatax
+	// TypeAlias describes alias ast for api syntax
 	TypeAlias struct {
 		Name        Expr
 		Assign      Expr
@@ -26,7 +26,7 @@ type (
 		CommentExpr Expr
 	}
 
-	// TypeStruct describes structure ast for api syatax
+	// TypeStruct describes structure ast for api syntax
 	TypeStruct struct {
 		Name    Expr
 		Struct  Expr
@@ -153,7 +153,6 @@ func (v *ApiVisitor) VisitTypeBlockBody(ctx *api.TypeBlockBodyContext) interface
 func (v *ApiVisitor) VisitTypeStruct(ctx *api.TypeStructContext) interface{} {
 	var st TypeStruct
 	st.Name = v.newExprWithToken(ctx.GetStructName())
-	v.exportCheck(st.Name)
 
 	if util.UnExport(ctx.GetStructName().GetText()) {
 
@@ -189,7 +188,6 @@ func (v *ApiVisitor) VisitTypeStruct(ctx *api.TypeStructContext) interface{} {
 func (v *ApiVisitor) VisitTypeBlockStruct(ctx *api.TypeBlockStructContext) interface{} {
 	var st TypeStruct
 	st.Name = v.newExprWithToken(ctx.GetStructName())
-	v.exportCheck(st.Name)
 
 	if ctx.GetStructToken() != nil {
 		structExpr := v.newExprWithToken(ctx.GetStructToken())
@@ -227,7 +225,7 @@ func (v *ApiVisitor) VisitTypeBlockAlias(ctx *api.TypeBlockAliasContext) interfa
 	alias.DocExpr = v.getDoc(ctx)
 	alias.CommentExpr = v.getComment(ctx)
 	// todo: reopen if necessary
-	v.panic(alias.Name, "unsupport alias")
+	v.panic(alias.Name, "unsupported alias")
 	return &alias
 }
 
@@ -240,7 +238,7 @@ func (v *ApiVisitor) VisitTypeAlias(ctx *api.TypeAliasContext) interface{} {
 	alias.DocExpr = v.getDoc(ctx)
 	alias.CommentExpr = v.getComment(ctx)
 	// todo: reopen if necessary
-	v.panic(alias.Name, "unsupport alias")
+	v.panic(alias.Name, "unsupported alias")
 	return &alias
 }
 
@@ -261,7 +259,6 @@ func (v *ApiVisitor) VisitField(ctx *api.FieldContext) interface{} {
 func (v *ApiVisitor) VisitNormalField(ctx *api.NormalFieldContext) interface{} {
 	var field TypeField
 	field.Name = v.newExprWithToken(ctx.GetFieldName())
-	v.exportCheck(field.Name)
 
 	iDataTypeContext := ctx.DataType()
 	if iDataTypeContext != nil {
@@ -289,7 +286,6 @@ func (v *ApiVisitor) VisitAnonymousFiled(ctx *api.AnonymousFiledContext) interfa
 	field.IsAnonymous = true
 	if ctx.GetStar() != nil {
 		nameExpr := v.newExprWithTerminalNode(ctx.ID())
-		v.exportCheck(nameExpr)
 		field.DataType = &Pointer{
 			PointerExpr: v.newExprWithText(ctx.GetStar().GetText()+ctx.ID().GetText(), start.GetLine(), start.GetColumn(), start.GetStart(), stop.GetStop()),
 			Star:        v.newExprWithToken(ctx.GetStar()),
@@ -297,7 +293,6 @@ func (v *ApiVisitor) VisitAnonymousFiled(ctx *api.AnonymousFiledContext) interfa
 		}
 	} else {
 		nameExpr := v.newExprWithTerminalNode(ctx.ID())
-		v.exportCheck(nameExpr)
 		field.DataType = &Literal{Literal: nameExpr}
 	}
 	field.DocExpr = v.getDoc(ctx)
@@ -309,7 +304,6 @@ func (v *ApiVisitor) VisitAnonymousFiled(ctx *api.AnonymousFiledContext) interfa
 func (v *ApiVisitor) VisitDataType(ctx *api.DataTypeContext) interface{} {
 	if ctx.ID() != nil {
 		idExpr := v.newExprWithTerminalNode(ctx.ID())
-		v.exportCheck(idExpr)
 		return &Literal{Literal: idExpr}
 	}
 	if ctx.MapType() != nil {
@@ -325,7 +319,7 @@ func (v *ApiVisitor) VisitDataType(ctx *api.DataTypeContext) interface{} {
 	if ctx.GetTime() != nil {
 		// todo: reopen if it is necessary
 		timeExpr := v.newExprWithToken(ctx.GetTime())
-		v.panic(timeExpr, "unsupport time.Time")
+		v.panic(timeExpr, "unsupported time.Time")
 		return &Time{Literal: timeExpr}
 	}
 	if ctx.PointerType() != nil {
@@ -337,7 +331,6 @@ func (v *ApiVisitor) VisitDataType(ctx *api.DataTypeContext) interface{} {
 // VisitPointerType implements from api.BaseApiParserVisitor
 func (v *ApiVisitor) VisitPointerType(ctx *api.PointerTypeContext) interface{} {
 	nameExpr := v.newExprWithTerminalNode(ctx.ID())
-	v.exportCheck(nameExpr)
 	return &Pointer{
 		PointerExpr: v.newExprWithText(ctx.GetText(), ctx.GetStar().GetLine(), ctx.GetStar().GetColumn(), ctx.GetStar().GetStart(), ctx.ID().GetSymbol().GetStop()),
 		Star:        v.newExprWithToken(ctx.GetStar()),
